@@ -49,8 +49,20 @@ rover = {
     }
 
 #DEFINITION OF FUNCTIONS
-def get_mass(r):
-    print('get_mass')
+def get_mass(rover):
+    if (type(rover) is not dict):
+        raise Exception("Argument passed must be a dictionary")
+        
+        
+    mass = 0
+    mass += rover['wheel_assembly']['wheel']['mass'] * 6
+    mass += rover['wheel_assembly']['speed_reducer']['mass']
+    mass += rover['wheel_assembly']['motor']['mass']
+    mass += rover['chassis']['mass']
+    mass += rover['pwer_subsys']['mass']
+    mass += rover['science_payload']['mass']
+    
+    return mass
 
 def get_gear_ratio():
     print('get_gear_ratio')
@@ -69,3 +81,6 @@ def F_rolling():
     
 def F_net():
     print('F_net')
+    
+
+print(get_mass(rover))
