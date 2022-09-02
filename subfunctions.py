@@ -1,4 +1,6 @@
 #ESTABLISHMENT OF DICTIONARIES
+#thus is random
+
 
 planet = {
     'g' : 3.72 #acceleration due of gravity in m/s^2
