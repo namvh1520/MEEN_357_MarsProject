@@ -66,8 +66,16 @@ def get_mass(rover):
     
     return mass
 
-def get_gear_ratio():
-    print('get_gear_ratio')
+def get_gear_ratio(speed_reducer):
+    if (type(speed_reducer) is not dict):
+        raise Exception("Argument passed must be a dictionary")
+        
+    if (speed_reducer['type'].lower() != 'reverted'):
+        raise Exception("Type of speed reducer should be reverted")
+        
+    Ng = speed_reducer['diam_pinion'] / speed_reducer['diam_gear']
+    
+    return Ng
 
 def tau_dcmotor():
     print('tau_dcmotor')
@@ -86,3 +94,4 @@ def F_net():
     
 
 print(get_mass(rover))
+print(get_gear_ratio(speed_reducer))
