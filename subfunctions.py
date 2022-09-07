@@ -1,5 +1,7 @@
+import numpy as np
+
 #ESTABLISHMENT OF DICTIONARIES
-#thus is random
+
 
 
 planet = {
@@ -57,7 +59,7 @@ def get_mass(rover):
         
         
     mass = 0
-    mass += rover['wheel_assembly']['wheel']['mass'] * 6
+    mass += rover['wheel_assembly']['wheel']['mass'] * 6 #There are 6 wheels
     mass += rover['wheel_assembly']['speed_reducer']['mass']
     mass += rover['wheel_assembly']['motor']['mass']
     mass += rover['chassis']['mass']
@@ -77,8 +79,12 @@ def get_gear_ratio(speed_reducer):
     
     return Ng
 
-def tau_dcmotor():
-    print('tau_dcmotor')
+def tau_dcmotor(omega, motor):
+    if (type(motor) is not dict):
+        raise Exception("Motor argument must be a dictionary")
+    if (type(omega) is not np.ndarray and type(omega) is not int and type(omega) is not float):
+        raise Exception("Omega argument must be an np.array or a scalar")
+
 
 def F_drive():
     print('F_drive')
@@ -92,6 +98,3 @@ def F_rolling():
 def F_net():
     print('F_net')
     
-
-print(get_mass(rover))
-print(get_gear_ratio(speed_reducer))
