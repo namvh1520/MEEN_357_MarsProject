@@ -22,7 +22,7 @@ chassis = {
 
 motor = {
     'torque_stall' : 170, #torque in Nm
-    'torque_noload' : 0, #toque in Nm
+    'torque_noload' : 0, #torque in Nm
     'speed_noload' : 3.8, #speed in rad/s
     'mass' : 5 #mass in kg
     }
@@ -49,7 +49,7 @@ rover = {
     'wheel_assembly' : wheel_assembly,
     'chassis' : chassis,
     'science_payload' : science_payload,
-    'pwer_subsys' : power_subsys
+    'power_subsys' : power_subsys
     }
 
 #DEFINITION OF FUNCTIONS
@@ -98,11 +98,31 @@ def tau_dcmotor(omega, motor):
     return tau
 
 def F_drive(omega, rover):
+    if (type(rover) is not dict):
+        raise Exception("Motor argument must be a dictionary")
+    if (type(omega) is not np.ndarray):
+        raise Exception("Omega argument must be an np.array")
+        
+    radius = rover['wheel_assembly']['wheel']['radius']
+    motor = rover['wheel_assembly']['motor']
+    taudc = tau_dcmotor(omega, motor)
+    tauwheel = taudc * get_gear_ratio(rover['wheel_assembly']['speed_reducer'])
+    Fd = tauwheel/radius * 6
     
-    print('F_drive')
+    return Fd
 
-def F_gravity(terrain_angel, rover, planet):
-    print('F_gravity')
+def F_gravity(terrain_angle, rover, planet):
+    if (type(terrain_angle) is not np.ndarray):
+        raise Exception("Terrain Angle must be an np.arry")
+    if (type(rover) is not dict):
+        raise Exception("Rover must be a dictionary")
+    if (type(planet) is not dict):
+        raise Exception("Planet must be a dictionary")
+        
+    for item in terrain_angle:
+
+        
+    return 
     
 def F_rolling(omega, terrain_angle, rover, planet, Crr):
     print('F_rolling')
@@ -110,3 +130,6 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
 def F_net(omega, terrain_angle, rover, planet, Crr):
     print('F_net')
   
+    
+a = np.array([2])
+print(F_drive(a, rover))
