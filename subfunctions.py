@@ -68,33 +68,45 @@ def get_mass(rover):
     
     return mass
 
-def get_gear_ratio(speed_reducer):
+def get_gear_ratio(speed_reducer): #this function compute the gear ratio of the speed reducer
+    
+    #Type Checking
     if (type(speed_reducer) is not dict):
         raise Exception("Argument passed must be a dictionary")
         
     if (speed_reducer['type'].lower() != 'reverted'):
         raise Exception("Type of speed reducer should be reverted")
         
-    Ng = speed_reducer['diam_pinion'] / speed_reducer['diam_gear']
+    #Calculating gear ratio
+    Ng = (speed_reducer['diam_gear'] / speed_reducer['diam_pinion'])**2
     
     return Ng
 
 def tau_dcmotor(omega, motor):
     if (type(motor) is not dict):
         raise Exception("Motor argument must be a dictionary")
-    if (type(omega) is not np.ndarray and type(omega) is not int and type(omega) is not float):
-        raise Exception("Omega argument must be an np.array or a scalar")
+    if (type(omega) is not np.ndarray):
+        raise Exception("Omega argument must be an np.array")
+    
+        
+    torque_stall = motor['torque_stall']
+    torque_noload = motor['torque_noload']
+    speed_noload = motor['speed_noload']
+    
+    tau = torque_stall - ((torque_stall - torque_noload)/speed_noload)*omega
+    
+    return tau
 
-
-def F_drive():
+def F_drive(omega, rover):
+    
     print('F_drive')
 
-def F_gravity():
+def F_gravity(terrain_angel, rover, planet):
     print('F_gravity')
     
-def F_rolling():
+def F_rolling(omega, terrain_angle, rover, planet, Crr):
     print('F_rolling')
     
-def F_net():
+def F_net(omega, terrain_angle, rover, planet, Crr):
     print('F_net')
-    
+  
