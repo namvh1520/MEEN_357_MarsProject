@@ -1,11 +1,12 @@
 import numpy as np
+import math
 
 #ESTABLISHMENT OF DICTIONARIES
 
 
 
 planet = {
-    'g' : 3.72 #acceleration due of gravity in m/s^2
+    'gravity' : -3.72 #acceleration due of gravity in m/s^2
     }
 
 power_subsys = {
@@ -63,10 +64,10 @@ def get_mass(rover):
     mass += rover['wheel_assembly']['speed_reducer']['mass']
     mass += rover['wheel_assembly']['motor']['mass']
     mass += rover['chassis']['mass']
-    mass += rover['pwer_subsys']['mass']
+    mass += rover['power_subsys']['mass']
     mass += rover['science_payload']['mass']
     
-    return mass
+    return mass #in kg
 
 def get_gear_ratio(speed_reducer): #this function compute the gear ratio of the speed reducer
     
@@ -113,23 +114,65 @@ def F_drive(omega, rover):
 
 def F_gravity(terrain_angle, rover, planet):
     if (type(terrain_angle) is not np.ndarray):
-        raise Exception("Terrain Angle must be an np.arry")
+        raise Exception("Terrain Angle must be an np.array")
     if (type(rover) is not dict):
         raise Exception("Rover must be a dictionary")
     if (type(planet) is not dict):
         raise Exception("Planet must be a dictionary")
         
-    for item in terrain_angle:
-
+    if np.any((terrain_angle <-75) | (terrain_angle > 75)):
+        raise Exception("Terrain Angle must be betwen -75 and 75 degrees")
         
-    return 
+    Fgt = get_mass(rover) * planet['gravity'] * np.sin(terrain_angle)
+    
+    return Fgt
+    
     
 def F_rolling(omega, terrain_angle, rover, planet, Crr):
-    print('F_rolling')
+    if (not isinstance(omega, np.ndarray)):
+        raise Exception("Omega must be an np.array")
+    if (not isinstance(terrain_angle, np.ndarray)):
+        raise Exception("Terrain Angle must be an np.array")
+    if (not isinstance(rover, dict)):
+        raise Exception("Rover must be a dictionary")
+    if (not isinstance(planet, dict)):
+        raise Exception("Planet must be a dictionary")
+    if (not isinstance(Crr, int) and not isinstance(Crr, float) or Crr < 0):
+        raise Exception("Crr must be a scalar")
+    
+    if (omega.size != terrain_angle.size):
+        raise Exception("Omega and terrain angle must be the same size")
+    if np.any((terrain_angle < -75) | (terrain_angle > 75)):
+        raise Exception("Terrain angle must be between -75 and 75")
+        
+        
+    Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle)
+    
+    Frr = math.erf(40 * rover['wheel_assembly']['wheel']['radius'] * get_gear_ratio(rover['wheel_assembly']['speed_reducer'])) * omega * Fr1
+    return Frr
     
 def F_net(omega, terrain_angle, rover, planet, Crr):
-    print('F_net')
-  
+    if (not isinstance(omega, np.ndarray)):
+        raise Exception("Omega must be an np.array")
+    if (not isinstance(terrain_angle, np.ndarray)):
+        raise Exception("Terrain Angle must be an np.array")
+    if (not isinstance(rover, dict)):
+        raise Exception("Rover must be a dictionary")
+    if (not isinstance(planet, dict)):
+        raise Exception("Planet must be a dictionary")
+    if (not isinstance(Crr, int) and not isinstance(Crr, float) or Crr < 0):
+        raise Exception("Crr must be a scalar")
     
-a = np.array([2])
-print(F_drive(a, rover))
+    if (omega.size != terrain_angle.size):
+        raise Exception("Omega and terrain angle must be the same size")
+    if np.any((terrain_angle < -75) | (terrain_angle > 75)):
+        raise Exception("Terrain angle must be between -75 and 75")
+        
+        
+    Frr = np.sqrt(F_drive(omega, rover)**2 + F_gravity(terrain_angle, rover, planet)**2 + F_rolling(omega, terrain_angle, rover, planet, Crr)**2)
+    
+    return Frr
+    
+c = np.array([-45, 20])
+d = np.array([.5, .2])
+print(F_net(d,c, rover, planet, 20))
