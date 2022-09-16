@@ -1,58 +1,60 @@
 import numpy as np
-import math
+from scipy import special 
 
 #ESTABLISHMENT OF DICTIONARIES
 
 
+def create_dictionary():
+    planet = {
+        'gravity' : -3.72 #acceleration due of gravity in m/s^2
+        }
 
-planet = {
-    'gravity' : -3.72 #acceleration due of gravity in m/s^2
-    }
+    power_subsys = {
+        'mass' : 90 #mass in kg
+        }
 
-power_subsys = {
-    'mass' : 90 #mass in kg
-    }
+    science_payload = {
+        'mass' : 75 #mass in kg
+        }
 
-science_payload = {
-    'mass' : 75 #mass in kg
-    }
+    chassis = {
+        'mass' : 659 #mass in kg
+        }
 
-chassis = {
-    'mass' : 659 #mass in kg
-    }
+    motor = {
+        'torque_stall' : 170, #torque in Nm
+        'torque_noload' : 0, #torque in Nm
+        'speed_noload' : 3.8, #speed in rad/s
+        'mass' : 5 #mass in kg
+        }
 
-motor = {
-    'torque_stall' : 170, #torque in Nm
-    'torque_noload' : 0, #torque in Nm
-    'speed_noload' : 3.8, #speed in rad/s
-    'mass' : 5 #mass in kg
-    }
+    speed_reducer = {
+        'type' : 'reverted', #only valid type in phase 1
+        'diam_pinion' : .04, #diamenter in m
+        'diam_gear' : .07, #diamenter in m
+        'mass' : 1.5 #mass in kg
+        }
 
-speed_reducer = {
-    'type' : 'reverted', #only valid type in phase 1
-    'diam_pinion' : .04, #diamenter in m
-    'diam_gear' : .07, #diamenter in m
-    'mass' : 1.5 #mass in kg
-    }
+    wheel = {
+        'radius' : .3, #radius in m
+        'mass' : 1 #mass in kg
+        }
 
-wheel = {
-    'radius' : .3, #radius in m
-    'mass' : 1 #mass in kg
-    }
-
-wheel_assembly = {
-    'wheel' : wheel,
-    'speed_reducer' : speed_reducer,
-    'motor' : motor  
-    }
-
-rover = {
-    'wheel_assembly' : wheel_assembly,
-    'chassis' : chassis,
-    'science_payload' : science_payload,
-    'power_subsys' : power_subsys
-    }
-
+    wheel_assembly = {
+        'wheel' : wheel,
+        'speed_reducer' : speed_reducer,
+        'motor' : motor  
+        }
+    
+    rover = {
+        'wheel_assembly' : wheel_assembly,
+        'chassis' : chassis,
+        'science_payload' : science_payload,
+        'power_subsys' : power_subsys
+        }
+    
+    return rover, planet
+    
 #DEFINITION OF FUNCTIONS
 def get_mass(rover):
     if (type(rover) is not dict):
@@ -148,7 +150,7 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
         
     Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle)
     
-    Frr = math.erf(40 * rover['wheel_assembly']['wheel']['radius'] * get_gear_ratio(rover['wheel_assembly']['speed_reducer'])) * omega * Fr1
+    Frr = special.erf(40 * rover['wheel_assembly']['wheel']['radius'] * get_gear_ratio(rover['wheel_assembly']['speed_reducer']) * omega) * Fr1
     return Frr
     
 def F_net(omega, terrain_angle, rover, planet, Crr):
@@ -173,6 +175,3 @@ def F_net(omega, terrain_angle, rover, planet, Crr):
     
     return Frr
     
-c = np.array([-45, 20])
-d = np.array([.5, .2])
-print(F_net(d,c, rover, planet, 20))
