@@ -62,7 +62,7 @@ slope_array_deg = np.linspace(-10, 35, 25)
 CRR, SLOPE = np.meshgrid(Crr_array, slope_array_deg)
 VMAX = np.zeros(np.shape(CRR), dtype = float)
 
-
+'''
 ### FUNCTIONS USED WITHIN THE CODE
 def secant(fun, ini_guess, err_max = 1e-5, iter_max = 10000):
     
@@ -123,7 +123,7 @@ def secant(fun, ini_guess, err_max = 1e-5, iter_max = 10000):
             x1 = x2
         
     return root, err_est, numIter, exitFlag
-
+'''
 
 ### CODE
 N = np.shape(CRR)[0]

@@ -53,9 +53,8 @@ def create_dictionary():
         'power_subsys' : power_subsys
         }
     
-    return planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover
-
-planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover = create_dictionary()
+    return rover, planet
+    
 #DEFINITION OF FUNCTIONS
 def get_mass(rover):
     if (type(rover) is not dict):
@@ -97,7 +96,7 @@ def tau_dcmotor(omega, motor):
     torque_noload = motor['torque_noload']
     speed_noload = motor['speed_noload']
     
-    tau = torque_stall - (((torque_stall - torque_noload)/speed_noload)*omega)
+    tau = torque_stall - ((torque_stall - torque_noload)/speed_noload)*omega
     
     return tau
 
@@ -155,7 +154,7 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
     Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle * np.pi/180)
     
     Frr = special.erf(40 * rover['wheel_assembly']['wheel']['radius'] * get_gear_ratio(rover['wheel_assembly']['speed_reducer']) * omega) * Fr1
-    return abs(Frr) * -1
+    return abs(Frr) * -1 *6
     
 def F_net(omega, terrain_angle, rover, planet, Crr):
     if (not isinstance(omega, np.ndarray)):
