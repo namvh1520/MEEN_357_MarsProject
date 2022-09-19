@@ -155,7 +155,7 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
     Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle * np.pi/180)
     
     Frr = special.erf(40 * rover['wheel_assembly']['wheel']['radius'] *  (omega/ get_gear_ratio(rover['wheel_assembly']['speed_reducer'])) ) * Fr1
-    return abs(Frr) * -1 *6
+    return abs(Frr) * -1 * 6
     
 def F_net(omega, terrain_angle, rover, planet, Crr):
     if (not isinstance(omega, np.ndarray)):

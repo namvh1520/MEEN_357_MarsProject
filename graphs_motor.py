@@ -26,3 +26,5 @@ ax2.set_ylabel('Shaft Power [W]')
 ax3.plot(omega, power)
 ax3.set_xlabel('Shaft Speed (rad/s)')
 ax3.set_ylabel('Shaft Power [W]')
+
+print(tau)
