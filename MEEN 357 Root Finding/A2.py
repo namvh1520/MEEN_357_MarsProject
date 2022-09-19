@@ -1,103 +1,103 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Sep 13 11:39:10 2022
 
-@author: Nam Vo
-"""
+import math
 import numpy as np
-import matplotlib.pyplot as plt
-
-
-def falsepos(fun, lb, ub, err_max = 1e-5, iter_max =1000):
+def falsepos(fun, xl, xu, err_max = 1e-5, iter_max = 1000):
     
-    #Checking if input are valid
+    #check for exceptions
     if not callable(fun):
-        raise Exception('The first input must be a callable function.')
+        raise Exception('The first input must be a function.')
         
-    if not isinstance(lb, float) and not isinstance(lb, int):
+    if not isinstance(xl, float) and not isinstance(xl, int):
         raise Exception('The second and third inputs must be scalar values.')
         
-    if not isinstance(ub, float) and not isinstance(ub, int):
+    if not isinstance(xu, float) and not isinstance(xu, int):
         raise Exception('The second and third inputs must be scalar values.')
         
-    if (not isinstance(err_max, float) and not isinstance(err_max, int)) or err_max <=0:
+    if (not isinstance(err_max, float) and not isinstance(err_max, int)) or err_max<=0:
         raise Exception('The fourth and fifth inputs must be positive scalar values.')
         
     if (not isinstance(iter_max, float) and not isinstance(iter_max, int)) or iter_max <=0:
         raise Exception('The fourth and fifth inputs must be positive scalar values.')
-    
-    if lb >= ub:
-        raise Exception('The lower bound (second input) must be less than the upperbound(third input)')
+        
 
-    isDone = False
+    if xl >= xu:
+        raise Exception('The lower bound (second input) must be less than the upperbound (third input).')    
+    
+    #first assignment of variables
+    root = math.nan
+    err = math.nan
     numIter = 0
+    exitFlag = math.nan
     
-    root = np.nan
-    err_est = np.nan
     
-    fl = fun(lb)
-    fu = fun(ub)
+    isDone = False
     
-    if fl * fu > 0:
+  #if the bounds contain no root
+    '''
+    if fun(xl) * fun(xu) > 0:
         isDone = True
         exitFlag = -1
-    elif fl * fu == 0:
+        raise Exception('There is no root in stated domain')
+  
+    #if one of the bounds is the root
+    if fun(xl) * fun(xu) == 0:
         isDone = True
-        err_est = 0.0
-        exitFlag = 1
-        if abs(fl) <= abs(fu):
-            root = lb
+        err = 0
+        if abs(fun(xl)) < abs(fun(xu)):
+            root = xl
         else:
-            root = ub
-            
+            root = xu
+    '''
+    #algorithm
     while not isDone:
         
         numIter += 1
         
-        #Getting function value
-        fl = fun(lb)
-        fu = fun(ub)
+        root_x = xu - (fun(xu)*(xl-xu))/(fun(xl)-fun(xu))
         
-        #Finding xr
-        xr = ub - (fu * (lb - ub) /(fl - fu))
+        err = (abs(root_x - xl) / abs(root_x))
         
-        fc = fun(xr)
-        
-        #Checking if return is valid
-        if fc is np.nan:
+        if fun(root_x) is math.nan:
             isDone = True
             exitFlag = -2
             break
         
-        
-        if fl * fc == 0.0:
-            isDone = True
+        if fun(root_x) == 0:
             exitFlag = 1
-            err_est = 0.0
-            root = xr
+            err = 0
+            isDone = True
+            root = root_x
             break
-        elif fl * fc > 0:
-            lb = xr
-        else: 
-            ub = xr
             
-        err_est = 100 * abs((ub - lb)/xr)
-            
-        if err_est <= err_max:
-            isDone = True
-            root = xr
+        # the guess takes the place of the lower bound
+        elif root_x * xl >= 0:
+            xl = root_x
+        # the guess takes the place of the upper bound
+        else:
+            xu = root_x
+    
+        
+        if err <= err_max:
             exitFlag = 1
-            
+            isDone = True
+            root = root_x
+            break
+        
         if numIter >= iter_max:
-            isDone = True
             exitFlag = 0
-            root = xr
+            isDone = True
+            root = root_x
+            print('No root was found')
             break
-        
-    return root, err_est, numIter, exitFlag
+    
+    
+    
+    
+    return root, err, numIter, exitFlag
 
 
-def secant(fun, ini_guess, err_max = 1e-5, iter_max =1000):
+
+def secant(fun, ini_guess, err_max = 10e-100, iter_max =10000):
     
     if not callable(fun):
         raise Exception('The first input must be a callable function.')
@@ -112,7 +112,6 @@ def secant(fun, ini_guess, err_max = 1e-5, iter_max =1000):
         raise Exception('The fourth and fifth inputs must be positive scalar values.')
     
     guess2 = ini_guess + .001
-
     isDone = False
     numIter = 0
     
@@ -157,7 +156,7 @@ def secant(fun, ini_guess, err_max = 1e-5, iter_max =1000):
             guess2 = ini_guess
             ini_guess = xr
             
-        err_est = 100 * abs((ini_guess - guess2)/ini_guess)
+        err_est = 100 * abs((xr - ini_guess)/xr)
             
         if err_est <= err_max:
             isDone = True
@@ -170,54 +169,11 @@ def secant(fun, ini_guess, err_max = 1e-5, iter_max =1000):
             root = xr
             break
         
-    return root, err_est, numIter, exitFlag
+    return root#, err_est, numIter, exitFlag
 
+    
+    
+    
+    
+#code for testing either method
 
-def run():     
-
-    flagResult = {
-        1 : "Terminated normally",
-        0 : "Maximum number of iterations reached.",
-        -1 : "Invalid bracket given",
-        -2 : "Function returned either NaN or Inf"
-        }
-    
-    err_max = 10e-100
-    iter_max = 1000
-    
-    xl = 0
-    xu = 30
-
-    def funfun(x):
-        return (x**3) / 88
-    
-    def fun1(x):
-        return x * np.sin(x) + 3 *np.cos(x) - x
-    
-    def fun2(x):
-        return x * (np.sin(x) - x * np.cos(x))
-    
-    def fun3(x):
-        return (x**3 - 2 * x**2 + 5 * x -25)/40
-    
-    root, err_est, numIter, exitFlag = secant(funfun, xl,err_max, iter_max)
-    
-    # Check with Wolfram Alpha or other applications for correct root
-        
-    print("Root: ", root)
-    print("Error Estimate: ", err_est)
-    print("Number of Iterations: ", numIter)
-    print("Exit Flag: ", exitFlag, " -> ", flagResult[exitFlag])
-    print("Function Value: ", funfun(root))
-    
-    x = np.linspace(-6, 30, 100)
-    y = funfun(x)
-    
-    plt.plot(x, y)
-    plt.plot(x, 0 * x, color = "black", linestyle = "dashed")
-    plt.scatter(root, funfun(root), marker="*", color="red", s=100)
-    plt.grid()
-    plt.rcParams['figure.dpi'] = 300
-    plt.show()
-    
-run()

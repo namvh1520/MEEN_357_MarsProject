@@ -26,6 +26,9 @@ class Test_get_mass():
     def test_value_checking_false(self):
         self.assertRaises(Exception, sf.get_mass(9))
         
+        
+
+        
 
 if __name__ == '__main__':
     unittest.main()

@@ -6,7 +6,7 @@ from scipy import special
 
 def create_dictionary():
     planet = {
-        'gravity' : -3.72 #acceleration due of gravity in m/s^2
+        'gravity' : 3.72 #acceleration due of gravity in m/s^2
         }
 
     power_subsys = {
@@ -125,9 +125,12 @@ def F_gravity(terrain_angle, rover, planet):
     if np.any((terrain_angle <-75) | (terrain_angle > 75)):
         raise Exception("Terrain Angle must be betwen -75 and 75 degrees")
         
-    Fgt = get_mass(rover) * planet['gravity'] * np.sin(terrain_angle)
+    Fgt = get_mass(rover) * planet['gravity'] * np.sin(terrain_angle * np.pi / 180)
     
-    return Fgt
+    if terrain_angle < 0:
+        return abs(Fgt)
+    else:
+        return abs(Fgt) * -1
     
     
 def F_rolling(omega, terrain_angle, rover, planet, Crr):
@@ -148,10 +151,10 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
         raise Exception("Terrain angle must be between -75 and 75")
         
         
-    Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle)
+    Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle * np.pi/180)
     
     Frr = special.erf(40 * rover['wheel_assembly']['wheel']['radius'] * get_gear_ratio(rover['wheel_assembly']['speed_reducer']) * omega) * Fr1
-    return Frr
+    return abs(Frr) * -1
     
 def F_net(omega, terrain_angle, rover, planet, Crr):
     if (not isinstance(omega, np.ndarray)):
@@ -170,8 +173,8 @@ def F_net(omega, terrain_angle, rover, planet, Crr):
     if np.any((terrain_angle < -75) | (terrain_angle > 75)):
         raise Exception("Terrain angle must be between -75 and 75")
         
-        
-    Frr = np.sqrt(F_drive(omega, rover)**2 + F_gravity(terrain_angle, rover, planet)**2 + F_rolling(omega, terrain_angle, rover, planet, Crr)**2)
-    
-    return Frr
+       
+    Frr = np.sqrt(F_drive(omega, rover)**2 + F_gravity(terrain_angle, rover, planet)**2 +   F_rolling(omega, terrain_angle, rover, planet, Crr)**2)
+    Fr1 = F_drive(omega, rover) + F_gravity(terrain_angle, rover, planet) +   F_rolling(omega, terrain_angle, rover, planet, Crr)
+    return Fr1
     
