@@ -7,54 +7,7 @@ Crr = np.linspace(.1,.4,25)
 
 slope_array_deg1 = np.array([0])
 
-
-planet = {
-      'gravity' : -3.72 #acceleration due of gravity in m/s^2
-        }
-
-power_subsys = {
-        'mass' : 90 #mass in kg
-        }
-
-science_payload = {
-        'mass' : 75 #mass in kg
-        }
-
-chassis = {
-        'mass' : 659 #mass in kg
-        }
-motor = {
-        'torque_stall' : 170, #torque in Nm
-        'torque_noload' : 0, #torque in Nm
-        'speed_noload' : 3.8, #speed in rad/s
-        'mass' : 5 #mass in kg
-        }
-
-speed_reducer = {
-        'type' : 'reverted', #only valid type in phase 1
-        'diam_pinion' : .04, #diamenter in m
-        'diam_gear' : .07, #diamenter in m
-        'mass' : 1.5 #mass in kg
-        }
-
-wheel = {
-        'radius' : .3, #radius in m
-        'mass' : 1 #mass in kg
-        }
-
-wheel_assembly = {
-        'wheel' : wheel,
-        'speed_reducer' : speed_reducer,
-        'motor' : motor  
-        }
-    
-rover = {
-        'wheel_assembly' : wheel_assembly,
-        'chassis' : chassis,
-        'science_payload' : science_payload,
-        'power_subsys' : power_subsys
-        }
-
+planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover = sf.create_dictionary()
 
 
 def fun1(x):
