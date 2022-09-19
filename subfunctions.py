@@ -53,8 +53,9 @@ def create_dictionary():
         'power_subsys' : power_subsys
         }
     
-    return rover, planet
-    
+    return planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover
+
+planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover = create_dictionary()
 #DEFINITION OF FUNCTIONS
 def get_mass(rover):
     if (type(rover) is not dict):
@@ -96,7 +97,7 @@ def tau_dcmotor(omega, motor):
     torque_noload = motor['torque_noload']
     speed_noload = motor['speed_noload']
     
-    tau = torque_stall - ((torque_stall - torque_noload)/speed_noload)*omega
+    tau = torque_stall - (((torque_stall - torque_noload)/speed_noload)*omega)
     
     return tau
 
