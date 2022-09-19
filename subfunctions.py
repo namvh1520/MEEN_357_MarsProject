@@ -53,7 +53,7 @@ def create_dictionary():
         'power_subsys' : power_subsys
         }
     
-    return rover, planet
+    return planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover
     
 #DEFINITION OF FUNCTIONS
 def get_mass(rover):
