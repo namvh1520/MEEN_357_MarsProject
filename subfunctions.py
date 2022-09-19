@@ -90,11 +90,12 @@ def tau_dcmotor(omega, motor):
         raise Exception("Motor argument must be a dictionary")
     if (type(omega) is not np.ndarray):
         raise Exception("Omega argument must be an np.array")
-    
+        
         
     torque_stall = motor['torque_stall']
     torque_noload = motor['torque_noload']
     speed_noload = motor['speed_noload']
+    
     
     tau = torque_stall - ((torque_stall - torque_noload)/speed_noload)*omega
     

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover = sf.create_dictionary()
 
-omega_NL = .38
+omega_NL = 3.8
 omega = np.linspace(0, omega_NL, 100)
 tau = sf.tau_dcmotor(omega, motor)
 power = omega * tau
@@ -26,5 +26,3 @@ ax2.set_ylabel('Shaft Power [W]')
 ax3.plot(omega, power)
 ax3.set_xlabel('Shaft Speed (rad/s)')
 ax3.set_ylabel('Shaft Power [W]')
-
-print(power)
