@@ -144,7 +144,7 @@ for i in range(N):
 figure = plt.figure() 
 ax = Axes3D(figure, elev = 20, azim = 25) 
 ax.plot_surface(CRR, SLOPE, VMAX) 
-plt.title('Speed vs Slope and Rolling Resistance Coeficient')
+plt.title('Speed vs Slope and Rolling Resistance Coefficient')
 plt.ylabel('Slope (Degrees)')
 ax.set_zlabel('Speed (M/s)')
 plt.xlabel('CRR')
