@@ -27,4 +27,8 @@ ax3.plot(omega, power)
 ax3.set_xlabel('SR Speed (rad/s)')
 ax3.set_ylabel('SR Power [W]')
 
+print(power)
+print(omega)
+print(tau)
+print(sf.tau_dcmotor(omega, motor))
 print(sf.get_gear_ratio(speed_reducer))

@@ -154,7 +154,7 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
         
     Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle * np.pi/180)
     
-    Frr = special.erf(40 * rover['wheel_assembly']['wheel']['radius'] * get_gear_ratio(rover['wheel_assembly']['speed_reducer']) * omega) * Fr1
+    Frr = special.erf(40 * rover['wheel_assembly']['wheel']['radius'] *  (omega/ get_gear_ratio(rover['wheel_assembly']['speed_reducer'])) ) * Fr1
     return abs(Frr) * -1 *6
     
 def F_net(omega, terrain_angle, rover, planet, Crr):
@@ -175,7 +175,7 @@ def F_net(omega, terrain_angle, rover, planet, Crr):
         raise Exception("Terrain angle must be between -75 and 75")
         
        
-    Frr = np.sqrt(F_drive(omega, rover)**2 + F_gravity(terrain_angle, rover, planet)**2 +   F_rolling(omega, terrain_angle, rover, planet, Crr)**2)
+    #Frr = np.sqrt(F_drive(omega, rover)**2 + F_gravity(terrain_angle, rover, planet)**2 +   F_rolling(omega, terrain_angle, rover, planet, Crr)**2)
     Fr1 = F_drive(omega, rover) + F_gravity(terrain_angle, rover, planet) +   F_rolling(omega, terrain_angle, rover, planet, Crr)
     return Fr1
     
