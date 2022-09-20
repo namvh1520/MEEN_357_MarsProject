@@ -2,8 +2,6 @@ import numpy as np
 from scipy import special 
 
 #ESTABLISHMENT OF DICTIONARIES
-
-
 def create_dictionary():
     planet = {
         'gravity' : 3.72 #acceleration due of gravity in m/s^2
@@ -133,7 +131,6 @@ def F_gravity(terrain_angle, rover, planet):
     else:
         return abs(Fgt) * -1
     
-    
 def F_rolling(omega, terrain_angle, rover, planet, Crr):
     if (not isinstance(omega, np.ndarray)):
         raise Exception("Omega must be an np.array")
@@ -151,9 +148,7 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
     if np.any((terrain_angle < -75) | (terrain_angle > 75)):
         raise Exception("Terrain angle must be between -75 and 75")
         
-        
     Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle * np.pi/180)
-    
     Frr = special.erf(40 * rover['wheel_assembly']['wheel']['radius'] *  (omega/ get_gear_ratio(rover['wheel_assembly']['speed_reducer'])) ) * Fr1
     return abs(Frr) * -1 * 6
     
@@ -173,9 +168,7 @@ def F_net(omega, terrain_angle, rover, planet, Crr):
         raise Exception("Omega and terrain angle must be the same size")
     if np.any((terrain_angle < -75) | (terrain_angle > 75)):
         raise Exception("Terrain angle must be between -75 and 75")
-        
        
-    #Frr = np.sqrt(F_drive(omega, rover)**2 + F_gravity(terrain_angle, rover, planet)**2 +   F_rolling(omega, terrain_angle, rover, planet, Crr)**2)
     Fr1 = F_drive(omega, rover) + F_gravity(terrain_angle, rover, planet) +   F_rolling(omega, terrain_angle, rover, planet, Crr)
     return Fr1
     
