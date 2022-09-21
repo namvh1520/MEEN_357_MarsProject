@@ -89,8 +89,8 @@ def get_gear_ratio(speed_reducer): #this function compute the gear ratio of the 
 def tau_dcmotor(omega, motor):
     if (type(motor) is not dict):
         raise Exception("Motor argument must be a dictionary")
-    if (type(omega) is not np.ndarray):
-        raise Exception("Omega argument must be an np.array")
+    if (type(omega) is not np.ndarray or np.shape(omega[0]) != ()):
+        raise Exception("Omega argument must be an np.array with size 1")
         
         
     torque_stall = motor['torque_stall']
@@ -105,8 +105,8 @@ def tau_dcmotor(omega, motor):
 def F_drive(omega, rover):
     if (type(rover) is not dict):
         raise Exception("Motor argument must be a dictionary")
-    if (type(omega) is not np.ndarray):
-        raise Exception("Omega argument must be an np.array")
+    if (type(omega) is not np.ndarray or np.shape(omega[0]) != ()):
+        raise Exception("Omega argument must be an np.array with size 1")
         
     radius = rover['wheel_assembly']['wheel']['radius']
     motor = rover['wheel_assembly']['motor']
@@ -117,8 +117,8 @@ def F_drive(omega, rover):
     return Fd
 
 def F_gravity(terrain_angle, rover, planet):
-    if (type(terrain_angle) is not np.ndarray):
-        raise Exception("Terrain Angle must be an np.array")
+    if (type(terrain_angle) is not np.ndarray or np.shape(terrain_angle[0]) != ()):
+        raise Exception("Terrain Angle must be an np.array of dimension 1")
     if (type(rover) is not dict):
         raise Exception("Rover must be a dictionary")
     if (type(planet) is not dict):
@@ -136,10 +136,10 @@ def F_gravity(terrain_angle, rover, planet):
     
     
 def F_rolling(omega, terrain_angle, rover, planet, Crr):
-    if (not isinstance(omega, np.ndarray)):
-        raise Exception("Omega must be an np.array")
-    if (not isinstance(terrain_angle, np.ndarray)):
-        raise Exception("Terrain Angle must be an np.array")
+    if (type(omega) is not np.ndarray or np.shape(omega[0]) != ()):
+        raise Exception("Omega argument must be an np.array with size 1")
+    if (type(terrain_angle) is not np.ndarray or np.shape(terrain_angle[0]) != ()):
+        raise Exception("Terrain Angle must be an np.array of dimension 1")
     if (not isinstance(rover, dict)):
         raise Exception("Rover must be a dictionary")
     if (not isinstance(planet, dict)):
@@ -159,10 +159,10 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
     return abs(Frr) * -1 * 6
     
 def F_net(omega, terrain_angle, rover, planet, Crr):
-    if (not isinstance(omega, np.ndarray)):
-        raise Exception("Omega must be an np.array")
-    if (not isinstance(terrain_angle, np.ndarray)):
-        raise Exception("Terrain Angle must be an np.array")
+    if (type(omega) is not np.ndarray or np.shape(omega[0]) != ()):
+        raise Exception("Omega argument must be an np.array with size 1")
+    if (type(terrain_angle) is not np.ndarray or np.shape(terrain_angle[0]) != ()):
+        raise Exception("Terrain Angle must be an np.array of dimension 1")
     if (not isinstance(rover, dict)):
         raise Exception("Rover must be a dictionary")
     if (not isinstance(planet, dict)):
@@ -253,3 +253,4 @@ def secant(fun, ini_guess, err_max = 10e-100, iter_max =10000):
             break
         
     return root#, err_est, numIter, exitFlag
+
