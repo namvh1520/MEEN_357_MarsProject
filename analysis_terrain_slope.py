@@ -1,6 +1,5 @@
 import numpy as np
 import subfunctions as sf
-import A2 as A2
 import matplotlib.pyplot as plt
 
 Crr = .2
@@ -8,7 +7,6 @@ Crr = .2
 slope_array_deg1 = np.linspace(-10,35,25)
 
 planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover = sf.create_dictionary()
-
 
 def fun1(x):
     drive = sf.F_drive(np.array([x]),rover)
@@ -26,8 +24,7 @@ hope =[]
 for i in slope_array_deg1:
     slope_array_deg = i
     hope.append(i)
-    temp.append(A2.secant(fun1,3) * .3)
-
+    temp.append(sf.secant(fun1,3) * .3)
 
 v_max = np.array(temp)
 

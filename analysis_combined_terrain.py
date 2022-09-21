@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import subfunctions as sf
-import A2
 from mpl_toolkits.mplot3d import Axes3D
 
 planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover = sf.create_dictionary()
@@ -29,7 +28,7 @@ for i in range(N):
     for j in range(N):
         Crr_sample = float(CRR[i,j])
         slope_sample = float(SLOPE[i,j])
-        VMAX[i,j] = (A2.secant(fun1,1) * .3)
+        VMAX[i,j] = (sf.secant(fun1,1) * .3)
         
 figure = plt.figure() 
 ax = Axes3D(figure, elev = 20, azim = 25) 

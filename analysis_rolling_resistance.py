@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import subfunctions as sf
-import A2 as A2
 
 Crr = np.linspace(.1,.4,25)
 
@@ -23,7 +22,7 @@ hope =[]
 for i in Crr:
     Crr1 = i
     hope.append(i)
-    temp.append(A2.secant(fun1,3) * .3)
+    temp.append(sf.secant(fun1,3) * .3)
 
 
 v_max = np.array(temp)
