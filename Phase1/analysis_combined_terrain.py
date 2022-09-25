@@ -31,7 +31,7 @@ for i in range(N):
         VMAX[i,j] = (sf.secant(fun1,1) * .3)
         
 figure = plt.figure() 
-ax = Axes3D(figure, elev = 20, azim = 25) 
+ax = Axes3D(figure, elev = 15, azim = 30) 
 ax.plot_surface(CRR, SLOPE, VMAX) 
 plt.title('Speed vs Slope and Rolling Resistance Coefficient')
 plt.ylabel('Slope (Degrees)')

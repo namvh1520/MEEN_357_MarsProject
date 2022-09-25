@@ -1,32 +1,31 @@
 import numpy as np
 from scipy import special 
+import math
 
 
 #ESTABLISHMENT OF DICTIONARIES
-
-
 def create_dictionary():
     planet = {
         'gravity' : 3.72 #acceleration due of gravity in m/s^2
         }
 
     power_subsys = {
-        'mass' : 90 #mass in kg
+        'mass' : 90.0 #mass in kg
         }
 
     science_payload = {
-        'mass' : 75 #mass in kg
+        'mass' : 75.0 #mass in kg
         }
 
     chassis = {
-        'mass' : 659 #mass in kg
+        'mass' : 659.0 #mass in kg
         }
 
     motor = {
         'torque_stall' : 170, #torque in Nm
-        'torque_noload' : 0, #torque in Nm
+        'torque_noload' : 0.0, #torque in Nm
         'speed_noload' : 3.8, #speed in rad/s
-        'mass' : 5 #mass in kg
+        'mass' : 5.0 #mass in kg
         }
 
     speed_reducer = {
@@ -38,7 +37,7 @@ def create_dictionary():
 
     wheel = {
         'radius' : .3, #radius in m
-        'mass' : 1 #mass in kg
+        'mass' : 1.0 #mass in kg
         }
 
     wheel_assembly = {
@@ -60,8 +59,7 @@ def create_dictionary():
 def get_mass(rover):
     if (type(rover) is not dict):
         raise Exception("Argument passed must be a dictionary")
-        
-        
+
     mass = 0
     mass += rover['wheel_assembly']['wheel']['mass'] * 6 #There are 6 wheels
     mass += rover['wheel_assembly']['speed_reducer']['mass']
@@ -92,13 +90,11 @@ def tau_dcmotor(omega, motor):
     if (type(omega) is not np.ndarray or np.shape(omega[0]) != ()):
         raise Exception("Omega argument must be an np.array with size 1")
         
-        
     torque_stall = motor['torque_stall']
     torque_noload = motor['torque_noload']
     speed_noload = motor['speed_noload']
     
-    
-    tau = torque_stall - ((torque_stall - torque_noload)/speed_noload)*omega
+    tau = torque_stall - ((torque_stall - torque_noload)/speed_noload) * omega
     
     return tau
 
@@ -127,12 +123,14 @@ def F_gravity(terrain_angle, rover, planet):
     if np.any((terrain_angle <-75) | (terrain_angle > 75)):
         raise Exception("Terrain Angle must be betwen -75 and 75 degrees")
         
-    Fgt = get_mass(rover) * planet['gravity'] * np.sin(terrain_angle * np.pi / 180)
+    Fgt = get_mass(rover) * planet['gravity'] * np.sin(np.radians(terrain_angle))
     
-    if terrain_angle < 0:
-        return abs(Fgt)
-    else:
-        return abs(Fgt) * -1
+    return Fgt * -1
+    
+    #if terrain_angle < 0:
+     #   return abs(Fgt)
+    #else:
+     #   return abs(Fgt) * -1
     
     
 def F_rolling(omega, terrain_angle, rover, planet, Crr):
@@ -153,10 +151,11 @@ def F_rolling(omega, terrain_angle, rover, planet, Crr):
         raise Exception("Terrain angle must be between -75 and 75")
         
         
-    Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(terrain_angle * np.pi/180)
+    Fr1 = Crr * get_mass(rover) * planet['gravity'] * np.cos(np.radians(terrain_angle))
     
     Frr = special.erf(40 * rover['wheel_assembly']['wheel']['radius'] *  (omega/ get_gear_ratio(rover['wheel_assembly']['speed_reducer'])) ) * Fr1
-    return abs(Frr) * -1 * 6
+    
+    return Frr  * -1
     
 def F_net(omega, terrain_angle, rover, planet, Crr):
     if (type(omega) is not np.ndarray or np.shape(omega[0]) != ()):
@@ -176,7 +175,7 @@ def F_net(omega, terrain_angle, rover, planet, Crr):
         raise Exception("Terrain angle must be between -75 and 75")
         
        
-    #Frr = np.sqrt(F_drive(omega, rover)**2 + F_gravity(terrain_angle, rover, planet)**2 +   F_rolling(omega, terrain_angle, rover, planet, Crr)**2)
+    #Fr1 = np.sqrt(F_drive(omega, rover)**2 + F_gravity(terrain_angle, rover, planet)**2 +   F_rolling(omega, terrain_angle, rover, planet, Crr)**2)
     Fr1 = F_drive(omega, rover) + F_gravity(terrain_angle, rover, planet) +   F_rolling(omega, terrain_angle, rover, planet, Crr)
     return Fr1
 
@@ -254,3 +253,15 @@ def secant(fun, ini_guess, err_max = 10e-100, iter_max =10000):
         
     return root#, err_est, numIter, exitFlag
 
+planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover = create_dictionary()
+terrain_angle = np.array([-5.0, 0.0, 5.0, 10.0, 20.0, 30.0])
+omega = np.array([0.00, 0.50, 1.00, 2.00, 3.00, 3.80])
+true_value = np.array([281.7466,1,281.7466,561.3490,1105.6417,1616.3400])
+Crr = .1
+
+#print(F_drive(omega,rover))
+print(F_gravity(terrain_angle, rover, planet))
+print(F_net(omega, terrain_angle, rover, planet, Crr))
+#print(F_rolling(omega, terrain_angle, rover, planet, Crr))
+print(get_mass(rover))
+print(F_gravity(terrain_angle, rover, planet)/true_value)
