@@ -22,10 +22,10 @@ hope =[]
 for i in Crr:
     Crr1 = i
     hope.append(i)
-    temp.append(sf.secant(fun1,3) * .3)
+    temp.append(sf.secant(fun1,3))
 
 
-v_max = np.array(temp)
+v_max = np.array(temp) / sf.get_gear_ratio(speed_reducer) * wheel['radius']
 
 plt.plot(Crr,v_max)
 plt.xlabel('Rolling Resistance')
