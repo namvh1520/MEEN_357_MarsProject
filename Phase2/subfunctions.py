@@ -1,6 +1,61 @@
 import math
 import numpy as np
 
+def create_dictionary():
+    planet = {
+        'g' : 3.72 #acceleration due of gravity in m/s^2
+        }
+
+    power_subsys = {
+        'mass' : 90.0 #mass in kg
+        }
+
+    science_payload = {
+        'mass' : 75.0 #mass in kg
+        }
+
+    chassis = {
+        'mass' : 659.0 #mass in kg
+        }
+
+    motor = {
+        'torque_stall' : 170, #torque in Nm
+        'torque_noload' : 0.0, #torque in Nm
+        'speed_noload' : 3.8, #speed in rad/s
+        'mass' : 5.0 #mass in kg
+        }
+
+    speed_reducer = {
+        'type' : 'reverted', #only valid type in phase 1
+        'diam_pinion' : .04, #diamenter in m
+        'diam_gear' : .07, #diamenter in m
+        'mass' : 1.5 #mass in kg
+        }
+
+    wheel = {
+        'radius' : .3, #radius in m
+        'mass' : 1.0 #mass in kg
+        }
+
+    wheel_assembly = {
+        'wheel' : wheel,
+        'speed_reducer' : speed_reducer,
+        'motor' : motor  
+        }
+    
+    rover = {
+        'wheel_assembly' : wheel_assembly,
+        'chassis' : chassis,
+        'science_payload' : science_payload,
+        'power_subsys' : power_subsys
+        }
+    
+    return planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover
+
+
+create_dictionary()
+
+
 def get_mass(rover):
     """
     Inputs:  rover:  dict      Data structure containing rover parameters
@@ -297,3 +352,77 @@ def F_net(omega, terrain_angle, rover, planet, Crr):
     Fnet = Fd + Frr + Fg # signs are handled in individual functions
     
     return Fnet
+
+def secant(fun, ini_guess, err_max = 10e-100, iter_max =10000):
+    
+    if not callable(fun):
+        raise Exception('The first input must be a callable function.')
+        
+    if not isinstance(ini_guess, float) and not isinstance(ini_guess, int):
+        raise Exception('The second inputs must be scalar values.')
+                
+    if (not isinstance(err_max, float) and not isinstance(err_max, int)) or err_max <=0:
+        raise Exception('The fourth and fifth inputs must be positive scalar values.')
+        
+    if (not isinstance(iter_max, float) and not isinstance(iter_max, int)) or iter_max <=0:
+        raise Exception('The fourth and fifth inputs must be positive scalar values.')
+    
+    guess2 = ini_guess + .001
+    isDone = False
+    numIter = 0
+    
+    root = np.nan
+    err_est = np.nan
+    
+    fl = fun(ini_guess)
+    fu = fun(guess2)
+    
+    if fl * fu == 0:
+        isDone = True
+        err_est = 0.0
+        exitFlag = 1
+        if abs(fl) <= abs(fu):
+            root = ini_guess
+        else:
+            root = guess2
+        
+    while not isDone: 
+        numIter += 1
+        
+        fl = fun(ini_guess)
+        fu = fun(guess2)
+        
+        xr = ini_guess - (fun(ini_guess) * (guess2 - ini_guess)/(fun(guess2) - fun(ini_guess)))
+        
+        fc = fun(xr)
+        
+        if fc is np.nan:
+            isDone = True
+            exitFlag = -2
+            break
+        
+        
+        if fl * fc == 0.0:
+            isDone = True
+            exitFlag = 1
+            err_est = 0.0
+            root = xr
+            break
+        else: 
+            guess2 = ini_guess
+            ini_guess = xr
+            
+        err_est = 100 * abs((xr - ini_guess)/xr)
+            
+        if err_est <= err_max:
+            isDone = True
+            root = xr
+            exitFlag = 1
+            
+        if numIter >= iter_max:
+            isDone = True
+            exitFlag = 0
+            root = xr
+            break
+        
+    return root#, err_est, numIter, exitFlag
