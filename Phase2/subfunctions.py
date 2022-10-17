@@ -1,59 +1,10 @@
 import math
 import numpy as np
-
-def create_dictionary():
-    planet = {
-        'g' : 3.72 #acceleration due of gravity in m/s^2
-        }
-
-    power_subsys = {
-        'mass' : 90.0 #mass in kg
-        }
-
-    science_payload = {
-        'mass' : 75.0 #mass in kg
-        }
-
-    chassis = {
-        'mass' : 659.0 #mass in kg
-        }
-
-    motor = {
-        'torque_stall' : 170, #torque in Nm
-        'torque_noload' : 0.0, #torque in Nm
-        'speed_noload' : 3.8, #speed in rad/s
-        'mass' : 5.0 #mass in kg
-        }
-
-    speed_reducer = {
-        'type' : 'reverted', #only valid type in phase 1
-        'diam_pinion' : .04, #diamenter in m
-        'diam_gear' : .07, #diamenter in m
-        'mass' : 1.5 #mass in kg
-        }
-
-    wheel = {
-        'radius' : .3, #radius in m
-        'mass' : 1.0 #mass in kg
-        }
-
-    wheel_assembly = {
-        'wheel' : wheel,
-        'speed_reducer' : speed_reducer,
-        'motor' : motor  
-        }
-    
-    rover = {
-        'wheel_assembly' : wheel_assembly,
-        'chassis' : chassis,
-        'science_payload' : science_payload,
-        'power_subsys' : power_subsys
-        }
-    
-    return planet, power_subsys, science_payload, chassis, motor, speed_reducer, wheel, wheel_assembly, rover
+import define_rover_planet as drp
 
 
-create_dictionary()
+
+drp.create_dictionary()
 
 
 def get_mass(rover):
@@ -426,3 +377,65 @@ def secant(fun, ini_guess, err_max = 10e-100, iter_max =10000):
             break
         
     return root#, err_est, numIter, exitFlag
+
+def motorW(v, rover):
+    if (type(v) != int) and (type(v) != float) and (not isinstance(v, np.ndarray)):
+        raise Exception('First input must be a scalar or a vector. If input is a vector, it should be defined as a numpy array.')
+    elif not isinstance(v, np.ndarray):
+        v = np.array([v],dtype=float) # make the scalar a numpy array
+    elif len(np.shape(v)) != 1:
+        raise Exception('First input must be a scalar or a vector. Matrices are not allowed.')
+        
+    if type(rover) != dict:
+        raise Exception("Second input should be a dictionary")
+        
+    Ng = get_gear_ratio(rover['wheel_assembly']['speed_reducer'])
+    
+    wheelW = v/rover['wheel_assembly']['wheel']['radius']
+    
+    W = wheelW/Ng 
+    
+    return W
+
+def rover_dynamics(t, y, rover, planet, experiment):
+    
+    if (type(t) != int) and (type(t) != float):
+        raise Exception('First input must be a scalar')
+    
+    if (not isinstance(y,np.ndarray)):
+        raise Exception('Second input must be a vector')
+    elif len(np.shape(y)) != 1:
+        raise Exception("Second input must be a vector. Matrices are not allowed")
+    
+    if type(rover) != dict:
+        raise Exception("Third input should be a dictionary")
+        
+    if type(planet) != dict:
+        raise Exception("Fourth input should be a dictionary")
+        
+    if type(experiment) != dict:
+        raise Exception("Fifth input should be a dictionary")
+        
+    
+    pass
+
+def mechpower(v, rover):
+    if (type(v) != int) and (type(v) != float) and (not isinstance(v, np.ndarray)):
+        raise Exception('First input must be a scalar or a vector. If input is a vector, it should be defined as a numpy array.')
+    elif not isinstance(v, np.ndarray):
+        v = np.array([v],dtype=float) # make the scalar a numpy array
+    elif len(np.shape(v)) != 1:
+        raise Exception('First input must be a scalar or a vector. Matrices are not allowed.')
+        
+    if type(rover) != dict:
+        raise Exception("Second input should be a dictionary")
+        
+        
+    return motorW(v, rover) * tau_dcmotor(motorW(v, rover), rover)
+
+def battenergy():
+    pass
+
+def simulate_rover():
+    pass
+
