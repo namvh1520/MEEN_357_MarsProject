@@ -433,9 +433,19 @@ def mechpower(v, rover):
         
     return motorW(v, rover) * tau_dcmotor(motorW(v, rover), rover)
 
-def battenergy():
-    pass
+def battenergy(t,v,rover):
+    E = 0.0
+    eff_motor = 0.0 
+    
+    for i in v:
+        
+        #eff_motor = needs to calculate efficiency of the motor at a given torque/speed
+        
+        E += 6 * mechpower(i,rover) * eff_motor
+    
+    
+    return E * (t[-1] - t[0])
 
-def simulate_rover():
+def simulate_rover(rover, planet, experiment, end_event):
     pass
 
