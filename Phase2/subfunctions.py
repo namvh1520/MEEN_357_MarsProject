@@ -12,26 +12,7 @@ from scipy.integrate import solve_ivp
 #from scipy.integrate import simpson
 from statistics import mean
 
-chassis = {'mass': 659}
-science_payload = {'mass': 75}
-power_subsys = {'mass': 90}
-planet = {'g': 3.72}
-wheel = {'radius': 0.30, 'mass': 1.0}
-telemetry = {'Time': np.array([]), 'completion_time': 4 ,'velocity': np.array([]),'position':np.array([]),'distance_traveled': 4,'max_velocity': 4,'average_velocity': 4,'power': np.array([]),'battery_energy': 4,'energy_per_distance': 4} #NOT RIGHT
-speed_reducer = {'type': 'reverted', 'diam_pinion': 0.04, 'diam_gear': 0.07, 'mass': 1.5}
-motor = {'torque_stall': 170, 'torque_noload': 0, 'speed_noload': 3.80, 'mass': 5.0, 'effcy_tau': np.array([0,10,20,40,75,165]),'effcy': np.array([0,0.60,0.75,0.73,0.55,0.05])}
-wheel_assembly = {'wheel': wheel, 'speed_reducer': speed_reducer, 'motor': motor}
-rover = {'wheel_assembly': wheel_assembly, 'chassis': chassis, 'science_payload': science_payload, 'power_subsys': power_subsys,'telemetry':telemetry}
-experiment = {'time_range': np.array([]),'initial_conditions': np.array([]),'alpha_dist': np.array([]),'alpha_deg': np.array([]),'Crr':0.1}
-end_event = {'max_distance':50,'max_time':5000,'min_velocity':0.01}
 
-omega = np.linspace(0,motor['speed_noload'],25)
-terrain_angle = np.linspace(-75,75,25)
-Crr = 0.2
-
-v_scalar = 5
-v_vector = np.linspace(0,50,25)
-v_string = 'HI'
 
 
 def get_mass(rover):
@@ -607,6 +588,21 @@ def end_of_mission_event(end_event):
     
     return events
 
+def battenergy(t,v,rover):
+    E = 0.0
+    eff_motor = 0.0 
+    
+    for i in v:
+        
+        #eff_motor = needs to calculate efficiency of the motor at a given torque/speed
+        
+        E += 6 * mechpower(i,rover) * eff_motor
+    
+    
+    return E * (t[-1] - t[0])
+
+def simulate_rover(rover, planet, experiment, end_event):
+    pass
 
 
 
