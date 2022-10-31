@@ -20,15 +20,6 @@ def end_of_mission_event(end_event):
     velocity_threshold.terminal = True
     velocity_threshold.direction = -1
     
-    # terminal indicates whether any of the conditions can lead to the
-    # termination of the ODE solver. In this case all conditions can terminate
-    # the simulation independently.
-    
-    # direction indicates whether the direction along which the different
-    # conditions is reached matter or does not matter. In this case, only
-    # the direction in which the velocity treshold is arrived at matters
-    # (negative)
-    
     events = [distance_left, time_left, velocity_threshold]
     
     return events

@@ -1,33 +1,17 @@
-"""###########################################################################
-#   This file contains subfunctions for Phase 2 of the TAMU MEEN 357 project
-#
-#   Created by: MEEN 357 Engineering Analysis Team
-#   Last Modified: 6 October 2022
-###########################################################################"""
-
 import math
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.integrate import solve_ivp
-#from scipy.integrate import simpson
+from scipy.integrate import simpson
 from statistics import mean
 
 
 
 
-def get_mass(rover):
-    """
-    Inputs:  rover:  dict      Data structure containing rover parameters
-    
-    Outputs:     m:  scalar    Rover mass [kg].
-    """
-    
-    # Check that the input is a dict
+def get_mass(rover):    
     if type(rover) != dict:
         raise Exception('Input must be a dict')
     
-    # add up mass of chassis, power subsystem, science payload, 
-    # and components from all six wheel assemblies
     m = rover['chassis']['mass'] \
         + rover['power_subsys']['mass'] \
         + rover['science_payload']['mass'] \
@@ -525,25 +509,23 @@ def simulate_rover(rover,planet,experiment,end_event):
     if type(end_event) != dict:
         raise Exception('end_event input must be a dict')
     
-    # Main Code
-    fun = lambda t,y: rover_dynamics(t, y, rover, planet, experiment) # differential equation
-    t_span = experiment['time_range'] # time span
-    y0 = experiment['initial_conditions'].ravel() # initial conditions
-    events = end_of_mission_event(end_event) # stopping criteria
+    fun = lambda t,y: rover_dynamics(t, y, rover, planet, experiment)
+    t_span = experiment['time_range']
+    y0 = experiment['initial_conditions'].ravel()
+    events = end_of_mission_event(end_event)
     sol = solve_ivp(fun, t_span, y0, method = 'BDF', events=events) #t_eval=(np.linspace(0, 3000, 1000)))  # need a stiff solver like BDF
     
-    # extract necessary data
     v_max = max(sol.y[0,:])
     v_avg = mean(sol.y[0,:])
     P = mechpower(sol.y[0,:], rover)
+    print(P)
     E = battenergy(sol.t,sol.y[0,:],rover)
     
-    # Add telemetry info to rover dict
     telemetry = {'Time' : sol.t,
                  'completion_time' : sol.t[-1],
                  'velocity' : sol.y[0,:],
                  'position' : sol.y[1,:],
-                 'distance_traveled' : sol.y[1,-1],  # Matlab version had an integration of velocity over time, but if velocity must be positive (defined by min_velocity), then the final position is the distance traveled
+                 'distance_traveled' : sol.y[1,-1],
                  'max_velocity' : v_max,
                  'average_velocity' : v_avg,
                  'power' : P,
@@ -553,13 +535,7 @@ def simulate_rover(rover,planet,experiment,end_event):
     rover['telemetry'] = telemetry
     return rover
 
-def end_of_mission_event(end_event):
-    """
-    Defines an event that terminates the mission simulation. Mission is over
-    when rover reaches a certain distance, has moved for a maximum simulation 
-    time or has reached a minimum velocity.            
-    """
-    
+def end_of_mission_event(end_event):    
     mission_distance = end_event['max_distance']
     mission_max_time = end_event['max_time']
     mission_min_velocity = end_event['min_velocity']
@@ -574,35 +550,11 @@ def end_of_mission_event(end_event):
     
     velocity_threshold = lambda t,y: y[0] - mission_min_velocity;
     velocity_threshold.terminal = True
-    
-    # terminal indicates whether any of the conditions can lead to the
-    # termination of the ODE solver. In this case all conditions can terminate
-    # the simulation independently.
-    
-    # direction indicates whether the direction along which the different
-    # conditions is reached matter or does not matter. In this case, only
-    # the direction in which the velocity treshold is arrived at matters
-    # (negative)
+
     
     events = [distance_left, time_left, velocity_threshold]
     
     return events
-
-def battenergy(t,v,rover):
-    E = 0.0
-    eff_motor = 0.0 
-    
-    for i in v:
-        
-        #eff_motor = needs to calculate efficiency of the motor at a given torque/speed
-        
-        E += 6 * mechpower(i,rover) * eff_motor
-    
-    
-    return E * (t[-1] - t[0])
-
-def simulate_rover(rover, planet, experiment, end_event):
-    pass
 
 
 

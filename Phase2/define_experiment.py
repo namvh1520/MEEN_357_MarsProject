@@ -1,11 +1,3 @@
-"""###########################################################################
-#   This file initializes the experiment and end_event structures for 
-#   MEEN 357 project phase 2.
-#
-#   Created by: MEEN 357 Experimental Team
-#   Last Modified: 6 October 2022
-###########################################################################"""
-
 import numpy as np
 
 def experiment1():
