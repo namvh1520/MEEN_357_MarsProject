@@ -7,7 +7,7 @@ planet = {
         'g' : 3.72 #acceleration due of gravity in m/s^2
         }
 
-power_subsys = {
+power_subsys = { 
         'mass' : 90 #mass in kg
         }
 

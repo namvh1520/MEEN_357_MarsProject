@@ -2,7 +2,7 @@ import math
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.integrate import solve_ivp
-from scipy.integrate import simps
+from scipy.integrate import simpson
 from statistics import mean
 
 def get_mass(rover):
@@ -304,151 +304,190 @@ def F_net(omega, terrain_angle, rover, planet, Crr):
 
 
 def motorW(v, rover):
+    """
+    Inputs:               v:  np.ndarray     
+                      rover:  dictionary            
+    
+    Outputs:              omega:  np.ndarray    angular velocity of motor
+    """
     #Type Checking
     if (type(v) != int) and (type(v) != float) and (not isinstance(v, np.ndarray)):
-        raise Exception('v must be a scalar or vector')
+        raise Exception('v must be a scalar or a vector of type np.ndarray')
     elif not isinstance(v, np.ndarray):
         v = np.array([v],dtype=float)
     elif len(np.shape(v)) != 1:
-        raise Exception('v must be a scalar or vector')
+        raise Exception('v must be a scalar or a vector of type np.ndarray')
     
     if type(rover) != dict:
         raise Exception('rover input must be a dict')
         
+    radius = rover['wheel_assembly']['wheel']['radius']
+    Ng = get_gear_ratio(rover['wheel_assembly']['speed_reducer'])
     
-    return v*get_gear_ratio(rover['wheel_assembly']['speed_reducer'])/rover['wheel_assembly']['wheel']['radius']
+    omega = v*Ng/radius
+    
+    return omega
 
 
 def rover_dynamics(t, y, rover, planet, experiment):
-    #Type Checking
-   # if (type(t) != int) and (type(t) != float):
-   #     raise Exception('t must be a scalar.')
+    """
+    Inputs:         t:  scalar            time[s]
+                    y:  np.ndarray        vector and position array
+                rover:  dictionary        
+               planet:  dictionary              
+           experiment:  dictionary              
+    
+    Outputs:     dydt:  np.ndarray       derivative of y
+    """
+    #Type checking
+    if (type(t) != int) and (type(t) != float) and (not isinstance(t, np.ndarray)) and (not isinstance(t,np.float64)):
+        raise Exception('t should be a scalar')
+    elif isinstance(t, np.ndarray):
+        if len(t) == 1:
+            t = float(t)
+        else:
+            raise Exception('T should be a scalar')
     
     if (not isinstance(y, np.ndarray)) or (len(y) != 2):
-        raise Exception('y must be a 2x1 numpy array.')
+        raise Exception('Y should be a 2x1 np.ndarray')
     elif isinstance(y[0], np.ndarray):
         y = np.array([float(y[0]),float(y[1])]) 
         
     if type(rover) != dict:
-        raise Exception('rover input must be a dict')
-    
-    if type(planet) != dict:
-        raise Exception('planet input must be a dict')
-    
+        raise Exception('Rover should be a dictionary')
 
+    if type(planet) != dict:
+        raise Exception('Planet should be a dictionary')
+    
     if type(experiment) != dict:
-        raise Exception('experiment input must be a dict')
+        raise Exception('Experiment should be a dictionary')
     
-    v = float(y[0])
-    x = float(y[1])
     
-    omega = motorW(v, rover)   
+    omega = motorW(float(y[0]), rover)   
     alpha_fun = interp1d(experiment['alpha_dist'].ravel(), experiment['alpha_deg'].ravel(), kind = 'cubic', fill_value="extrapolate")
-    terrain_angle = float(alpha_fun(x))
-    F = F_net(omega, terrain_angle, rover, planet, experiment['Crr'])
+    angle = float(alpha_fun(float(y[1])))
+    Force = F_net(omega, angle, rover, planet, experiment['Crr'])
     
-    m = get_mass(rover)
-    accel = float(F/m)
-    dydt = np.array([accel, v], dtype = float)
+    mass = get_mass(rover)
+    acc = float(Force /mass)
     
-    return dydt
+    
+    dy = np.array([acc, float(y[0])], dtype = float)
+    
+    return dy
 
 
 def mechpower(v, rover):
-    # Type Checking
+    """
+    Inputs:               v:  np.ndarray
+                      rover:  dictionary          
+    
+    Outputs:            mechanicalPower:  np.ndarray
+    """
+    #Type checking
     if (type(v) != int) and (type(v) != float) and (not isinstance(v, np.ndarray)):
-        raise Exception('v input must be a scalar or a vector. If input is a vector, it should be defined as a numpy array.')
+        raise Exception('v must be a scalar or a vector of np.ndarray')
     elif not isinstance(v, np.ndarray):
         v = np.array([v],dtype=float)
     elif len(np.shape(v)) != 1:
-        raise Exception('v input must be a scalar or a vector. Matrices are not allowed.')
+        raise Exception('v must be a scalar or a vector of np.ndarray')
     
     if type(rover) != dict:
-        raise Exception('rover input must be a dict')
+        raise Exception('rover should be a dictionary')
     
     omega = motorW(v, rover)  
     tau = tau_dcmotor(omega, rover['wheel_assembly']['motor']) 
     
-    P = tau*omega
+    mechanicalPower = tau * omega
     
-    return P
+    return mechanicalPower
 
 
 def battenergy(t,v,rover):
-    #Type checking
+    """
+    Inputs:               t:  np.ndarray     time
+                          v:  np.ndarray     velocity
+                      rover:  dictionary            
+    
+    Outputs:              E:  scalar         total energy output by battery
+    """
+    #Type Checking
     if (not isinstance(t, np.ndarray)):
-        raise Exception('t input must be a scalar or a vector. If t is a vector, it should be defined as a numpy array.')
+        raise Exception('t must be a scalar or vector of np.ndarray')
     elif len(np.shape(t)) != 1:
-        raise Exception('First input must be a scalar or a vector. Matrices are not allowed.')
+        raise Exception('t must be a scalar or vector of np.ndarray')
         
     if (not isinstance(v, np.ndarray)):
-        raise Exception('v input must be a scalar or a vector. If v is a vector, it should be defined as a numpy array.')
+        raise Exception('v must be a scalar or vector of np.ndarray')
     elif len(np.shape(v)) != 1:
-        raise Exception('v input must be a scalar or a vector. Matrices are not allowed.')
+        raise Exception('v must be a scalar or vector of np.ndarray')
         
     if len(t) != len(v):
-        raise Exception('First two inputs must be the same size')
+        raise Exception('t and v should be the same size')
     
-    P = mechpower(v, rover)
-    omega = motorW(v, rover)
-    tau = tau_dcmotor(omega, rover['wheel_assembly']['motor'])
+    #efficiency function
+    effcy_fun = interp1d(rover['wheel_assembly']['motor']['effcy_tau'].ravel(), rover['wheel_assembly']['motor']['effcy'].ravel(), kind = 'cubic')
     
-    effcy_tau = rover['wheel_assembly']['motor']['effcy_tau'].ravel()
-    effcy = rover['wheel_assembly']['motor']['effcy'].ravel()
-    effcy_fun = interp1d(effcy_tau, effcy, kind = 'cubic')
-    effcy_dat = effcy_fun(tau)
-    P_batt = P/effcy_dat    
-    E_motor = simps(P_batt, t)
-    E = 6*E_motor
+    batteryPower = mechpower(v, rover)/effcy_fun(tau_dcmotor(motorW(v, rover), rover['wheel_assembly']['motor']))
     
-    return E
+    motorEnergy = simpson(batteryPower, t)
+    
+    return motorEnergy * 6
 
 
 def simulate_rover(rover,planet,experiment,end_event):
-    # Type checking
+    """
+    Inputs:     rover:  dictionary              
+               planet:  dictionary              
+           experiment:  dictionary              
+            end_event:  dictionary                              
+    
+    Outputs:    rover:  dictionary              
+    """
+    #Type Checking
     if type(rover) != dict:
-        raise Exception('rover input must be a dict')
-    
+        raise Exception('rover should be a dictionary')
     if type(planet) != dict:
-        raise Exception('planet input must be a dict')
-    
+        raise Exception('planet should be a dictionary')
     if type(experiment) != dict:
-        raise Exception('experiment input must be a dict')
-        
+        raise Exception('experiment should be a dictionary')
     if type(end_event) != dict:
-        raise Exception('end_event input must be a dict')
+        raise Exception('end_event should be a dictionary')
     
+    #solving for the telemetry of rover
     func = lambda t,y: rover_dynamics(t, y, rover, planet, experiment)
-    t_span = experiment['time_range']
-    y0 = experiment['initial_conditions'].ravel()
-    events = end_of_mission_event(end_event)
-    solution = solve_ivp(func, t_span, y0, method = 'BDF', events=events)
+    cock = experiment['time_range']
+    y_ini = experiment['initial_conditions'].ravel()
+    sol = solve_ivp(func, cock, y_ini, method = 'BDF', events=end_of_mission_event(end_event))
     
-    velocity_max = max(solution.y[0,:])
-    velocity_average = mean(solution.y[0,:])
-    P = mechpower(solution.y[0,:], rover)
-    print(P)
-    energy = battenergy(solution.t,solution.y[0,:],rover)
     
-    telemetry = {'Time' : solution.t,
-                 'completion_time' : solution.t[-1],
-                 'velocity' : solution.y[0,:],
-                 'position' : solution.y[1,:],
-                 'distance_traveled' : solution.y[1,-1],
-                 'max_velocity' : velocity_max,
-                 'average_velocity' : velocity_average,
-                 'power' : P,
-                 'battery_energy' : energy,
-                 'energy_per_distance' : energy/solution.y[1,-1]}
+    telemetry = {'Time' : sol.t,
+                 'completion_time' : sol.t[-1],
+                 'velocity' : sol.y[0,:],
+                 'position' : sol.y[1,:],
+                 'distance_traveled' : sol.y[1,-1],
+                 'max_velocity' : max(sol.y[0,:]),
+                 'average_velocity' : mean(sol.y[0,:]),
+                 'power' : mechpower(sol.y[0,:], rover),
+                 'battery_energy' : battenergy(sol.t,sol.y[0,:],rover),
+                 'energy_per_distance' : battenergy(sol.t,sol.y[0,:],rover)/sol.y[1,-1]}
     
     rover['telemetry'] = telemetry
+    
     return rover
 
-def end_of_mission_event(end_event):    
+def end_of_mission_event(end_event):
+    """
+    Defines an event that terminates the mission simulation. Mission is over
+    when rover reaches a certain distance, has moved for a maximum simulation 
+    time or has reached a minimum velocity.            
+    """
+    
     mission_distance = end_event['max_distance']
     mission_max_time = end_event['max_time']
     mission_min_velocity = end_event['min_velocity']
     
+    # Assume that y[1] is the distance traveled
     distance_left = lambda t,y: mission_distance - y[1]
     distance_left.terminal = True
     
@@ -458,7 +497,15 @@ def end_of_mission_event(end_event):
     
     velocity_threshold = lambda t,y: y[0] - mission_min_velocity;
     velocity_threshold.terminal = True
-
+    
+    # terminal indicates whether any of the conditions can lead to the
+    # termination of the ODE solver. In this case all conditions can terminate
+    # the simulation independently.
+    
+    # direction indicates whether the direction along which the different
+    # conditions is reached matter or does not matter. In this case, only
+    # the direction in which the velocity treshold is arrived at matters
+    # (negative)
     
     events = [distance_left, time_left, velocity_threshold]
     
