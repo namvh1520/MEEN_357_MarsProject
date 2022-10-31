@@ -1,3 +1,11 @@
+"""###########################################################################
+#   This file initializes the experiment and end_event structures for 
+#   MEEN 357 project phase 2.
+#
+#   Created by: MEEN 357 Experimental Team
+#   Last Modified: 6 October 2022
+###########################################################################"""
+
 import numpy as np
 
 def experiment1():
@@ -12,8 +20,8 @@ def experiment1():
     
     
     # Below are default values for example only:
-    end_event = {'max_distance' : 50,
-                 'max_time' : 5000,
+    end_event = {'max_distance' : 1000,
+                 'max_time' : 10000,
                  'min_velocity' : 0.01}
     
     return experiment, end_event

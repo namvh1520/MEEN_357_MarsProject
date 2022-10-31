@@ -2,7 +2,7 @@ import math
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.integrate import solve_ivp
-from scipy.integrate import simpson
+from scipy.integrate import simps
 from statistics import mean
 
 def get_mass(rover):
@@ -321,8 +321,8 @@ def motorW(v, rover):
 
 def rover_dynamics(t, y, rover, planet, experiment):
     #Type Checking
-    if (type(t) != int) and (type(t) != float):
-        raise Exception('t must be a scalar.')
+   # if (type(t) != int) and (type(t) != float):
+   #     raise Exception('t must be a scalar.')
     
     if (not isinstance(y, np.ndarray)) or (len(y) != 2):
         raise Exception('y must be a 2x1 numpy array.')
@@ -398,7 +398,7 @@ def battenergy(t,v,rover):
     effcy_fun = interp1d(effcy_tau, effcy, kind = 'cubic')
     effcy_dat = effcy_fun(tau)
     P_batt = P/effcy_dat    
-    E_motor = simpson(P_batt, t)
+    E_motor = simps(P_batt, t)
     E = 6*E_motor
     
     return E
