@@ -57,11 +57,11 @@ def plot_effcy(rover):
     effcy = rover['wheel_assembly']['motor']['effcy']
     effcy_tau = rover['wheel_assembly']['motor']['effcy_tau']
     
-    alpha_fun = interp1d(effcy_tau, effcy, kind = 'cubic')
+    effcy_fun = interp1d(effcy_tau, effcy, kind = 'cubic')
     
     x = np.linspace(effcy_tau[0], effcy_tau[-1], 101)
     
-    plt.plot(effcy_tau, effcy, 'r*', x, alpha_fun(x))
+    plt.plot(effcy_tau, effcy, 'r*', x, effcy_fun(x))
     plt.xlabel('Motor Torque')
     plt.ylabel('Motor Efficiency')
     
