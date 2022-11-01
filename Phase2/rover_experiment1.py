@@ -7,7 +7,7 @@ planet = {
         'g' : 3.72 #acceleration due of gravity in m/s^2
         }
 
-power_subsys = { 
+power_subsys = {
         'mass' : 90 #mass in kg
         }
 
@@ -63,22 +63,20 @@ def createplots(rover):
     power = rover_updated['telemetry']['power']
     
     
-    plt.plot(time, position)
-    plt.ylabel('Positon (m)')
-    plt.xlabel('Time (s)')
-    plt.title('Position vs Time')
-    plt.show()
+    fig, axs = plt.subplots(3)
+    plt.subplots_adjust(hspace=1.2)
+    axs[0].plot(time, position)
+    axs[0].set_title('Position vs Time')
+    axs[0].set_ylabel('Position (m)')
     
-    plt.plot(time, velocity)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Velocity (m/s)')
-    plt.title('Velocity vs Time')
-    plt.show()
+    axs[1].plot(time, velocity)
+    axs[1].set_title('Velocity vs Time')
+    axs[1].set_ylabel('Velocity (m/s)')
     
-    plt.plot(time, power)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Power (m/s)')
-    plt.title('Power vs Time')
-    plt.show()
+    axs[2].plot(time, power)
+    axs[2].set_title('Power vs Time')
+    axs[2].set_ylabel('Power (W)')
+
+    for ax in axs.flat: ax.set(xlabel='Time (s)')
 
 createplots(rover)
