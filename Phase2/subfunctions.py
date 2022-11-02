@@ -321,10 +321,11 @@ def motorW(v, rover):
     if type(rover) != dict:
         raise Exception('rover input must be a dict')
         
-        
+    #get the gear ratio and radius of wheel    
     Ng = get_gear_ratio(rover['wheel_assembly']['speed_reducer'])
     radius = rover['wheel_assembly']['wheel']['radius']
     
+    #rotational speed of wheel
     omega = v*Ng/radius
     
     return omega
@@ -348,12 +349,10 @@ def rover_dynamics(t, y, rover, planet, experiment):
             t = float(t)
         else:
             raise Exception('T should be a scalar')
-    
     if (not isinstance(y, np.ndarray)) or (len(y) != 2):
         raise Exception('Y should be a 2x1 np.ndarray')
     elif isinstance(y[0], np.ndarray):
-        y = np.array([float(y[0]),float(y[1])]) 
-        
+        y = np.array([float(y[0]),float(y[1])])  
     if type(rover) != dict:
         raise Exception('Rover should be a dictionary')
 
@@ -363,18 +362,22 @@ def rover_dynamics(t, y, rover, planet, experiment):
     if type(experiment) != dict:
         raise Exception('Experiment should be a dictionary')
     
-    
+    #speeeeeeeeeed
     omega = motorW(float(y[0]), rover)   
+    #interpolated values of efficiency 
     alpha_fun = interp1d(experiment['alpha_dist'].ravel(), experiment['alpha_deg'].ravel(), kind = 'cubic', fill_value="extrapolate")
     
+    #efficiency
     angle = float(alpha_fun(float(y[1])))
     
+    #forc through wheels
     Force = F_net(omega, angle, rover, planet, experiment['Crr'])
     
+    #acceleration of rover
     mass = get_mass(rover)
     acc = float(Force /mass)
     
-    
+    #acceleration and efficiency in an array [acceleration, efficiency]
     dy = np.array([acc, float(y[0])], dtype = float)
     
     return dy
@@ -398,10 +401,13 @@ def mechpower(v, rover):
     if type(rover) != dict:
         raise Exception('rover should be a dictionary')
     
+    #wheel speed
     omega = motorW(v, rover)  
     
+    #force of the motor @an angle
     tau = tau_dcmotor(omega, rover['wheel_assembly']['motor']) 
     
+    #power needed to ready that speed at that resistance
     mechanicalPower = omega * tau
     
     return mechanicalPower
