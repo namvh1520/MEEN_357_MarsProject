@@ -54,15 +54,16 @@ rover = {
 
 
 def plot_effcy(rover):
-    effcy = rover['wheel_assembly']['motor']['effcy']
-    effcy_tau = rover['wheel_assembly']['motor']['effcy_tau']
+    effcy = rover['wheel_assembly']['motor']['effcy'] #grabbing efficiency list
+    effcy_tau = rover['wheel_assembly']['motor']['effcy_tau'] #grabbing efficiency tau list
     
-    effcy_fun = interp1d(effcy_tau, effcy, kind = 'cubic')
+    alpha_fun = interp1d(effcy_tau, effcy, kind = 'cubic')
     
-    x = np.linspace(effcy_tau[0], effcy_tau[-1], 101)
+    x = np.linspace(effcy_tau[0], effcy_tau[-1], 101) #setting up x values for 100 points
     
-    plt.plot(effcy_tau, effcy, 'r*', x, effcy_fun(x))
+    plt.plot(effcy_tau, effcy, 'r*', x, alpha_fun(x)) #plotting motor torque
     plt.xlabel('Motor Torque')
     plt.ylabel('Motor Efficiency')
+    plt.title('Motor Torque vs Motor Efficiency')
     
 plot_effcy(rover)

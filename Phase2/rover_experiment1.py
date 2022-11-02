@@ -3,6 +3,7 @@ from subfunctions import simulate_rover
 import numpy as np
 import matplotlib.pyplot as plt
 
+## DICTIONARY
 planet = {
         'g' : 3.72 #acceleration due of gravity in m/s^2
         }
@@ -54,17 +55,17 @@ rover = {
         }
 
 def createplots(rover):
-    experiment, end_event = experiment1()
-    rover_updated = simulate_rover(rover, planet, experiment, end_event)
+    experiment, end_event = experiment1() #grabbing the experiment conditions from define_experiment
+    rover_updated = simulate_rover(rover, planet, experiment, end_event) #grabbing updated rover dictionary from simulate_rover
     
-    time = rover_updated['telemetry']['Time']
+    time = rover_updated['telemetry']['Time'] #grabbing lists out of the telemetry
     position = rover_updated['telemetry']['position']
     velocity = rover_updated['telemetry']['velocity']
     power = rover_updated['telemetry']['power']
     
     
-    fig, axs = plt.subplots(3)
-    plt.subplots_adjust(hspace=1.2)
+    fig, axs = plt.subplots(3) #plotting in a subplot
+    plt.subplots_adjust(hspace=1.2) #increasing distance between the three plots
     axs[0].plot(time, position)
     axs[0].set_title('Position vs Time')
     axs[0].set_ylabel('Position (m)')
@@ -77,6 +78,6 @@ def createplots(rover):
     axs[2].set_title('Power vs Time')
     axs[2].set_ylabel('Power (W)')
 
-    for ax in axs.flat: ax.set(xlabel='Time (s)')
+    for ax in axs.flat: ax.set(xlabel='Time (s)') #giving all three subplots the same x label
 
 createplots(rover)
