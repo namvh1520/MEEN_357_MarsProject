@@ -321,8 +321,9 @@ def motorW(v, rover):
     if type(rover) != dict:
         raise Exception('rover input must be a dict')
         
-    radius = rover['wheel_assembly']['wheel']['radius']
+        
     Ng = get_gear_ratio(rover['wheel_assembly']['speed_reducer'])
+    radius = rover['wheel_assembly']['wheel']['radius']
     
     omega = v*Ng/radius
     
@@ -365,7 +366,9 @@ def rover_dynamics(t, y, rover, planet, experiment):
     
     omega = motorW(float(y[0]), rover)   
     alpha_fun = interp1d(experiment['alpha_dist'].ravel(), experiment['alpha_deg'].ravel(), kind = 'cubic', fill_value="extrapolate")
+    
     angle = float(alpha_fun(float(y[1])))
+    
     Force = F_net(omega, angle, rover, planet, experiment['Crr'])
     
     mass = get_mass(rover)
@@ -396,9 +399,10 @@ def mechpower(v, rover):
         raise Exception('rover should be a dictionary')
     
     omega = motorW(v, rover)  
+    
     tau = tau_dcmotor(omega, rover['wheel_assembly']['motor']) 
     
-    mechanicalPower = tau * omega
+    mechanicalPower = omega * tau
     
     return mechanicalPower
 
@@ -456,9 +460,13 @@ def simulate_rover(rover,planet,experiment,end_event):
     
     #solving for the telemetry of rover
     func = lambda t,y: rover_dynamics(t, y, rover, planet, experiment)
-    cock = experiment['time_range']
+    
+    
+    time_span = experiment['time_range']
     y_ini = experiment['initial_conditions'].ravel()
-    sol = solve_ivp(func, cock, y_ini, method = 'BDF', events=end_of_mission_event(end_event))
+    
+    
+    sol = solve_ivp(func, time_span, y_ini, method = 'BDF', events=end_of_mission_event(end_event))
     
     
     telemetry = {'Time' : sol.t,
