@@ -413,30 +413,33 @@ def battenergy(t,v,rover):
                           v:  np.ndarray     velocity
                       rover:  dictionary            
     
-    Outputs:              E:  scalar         total energy output by battery
+    Outputs:         Energy:  scalar         total energy output by battery
     """
     #Type Checking
     if (not isinstance(t, np.ndarray)):
         raise Exception('t must be a scalar or vector of np.ndarray')
     elif len(np.shape(t)) != 1:
         raise Exception('t must be a scalar or vector of np.ndarray')
-        
     if (not isinstance(v, np.ndarray)):
         raise Exception('v must be a scalar or vector of np.ndarray')
     elif len(np.shape(v)) != 1:
-        raise Exception('v must be a scalar or vector of np.ndarray')
-        
+        raise Exception('v must be a scalar or vector of np.ndarray') 
     if len(t) != len(v):
         raise Exception('t and v should be the same size')
     
     #efficiency function
     effcy_fun = interp1d(rover['wheel_assembly']['motor']['effcy_tau'].ravel(), rover['wheel_assembly']['motor']['effcy'].ravel(), kind = 'cubic')
     
+    #calculating battery power
     batteryPower = mechpower(v, rover)/effcy_fun(tau_dcmotor(motorW(v, rover), rover['wheel_assembly']['motor']))
     
+    #calculaing energy output for each motor
     motorEnergy = simpson(batteryPower, t)
     
-    return motorEnergy * 6
+    #Energy output of battery
+    Energy = motorEnergy * 6
+    
+    return Energy
 
 
 def simulate_rover(rover,planet,experiment,end_event):
@@ -458,17 +461,17 @@ def simulate_rover(rover,planet,experiment,end_event):
     if type(end_event) != dict:
         raise Exception('end_event should be a dictionary')
     
-    #solving for the telemetry of rover
+    #creating differential equation
     func = lambda t,y: rover_dynamics(t, y, rover, planet, experiment)
     
-    
+    #obtaining necessary variables
     time_span = experiment['time_range']
     y_ini = experiment['initial_conditions'].ravel()
     
-    
+    #solving differential equations
     sol = solve_ivp(func, time_span, y_ini, method = 'BDF', events=end_of_mission_event(end_event))
     
-    
+    #creating telemetry data
     telemetry = {'Time' : sol.t,
                  'completion_time' : sol.t[-1],
                  'velocity' : sol.y[0,:],
@@ -480,6 +483,7 @@ def simulate_rover(rover,planet,experiment,end_event):
                  'battery_energy' : battenergy(sol.t,sol.y[0,:],rover),
                  'energy_per_distance' : battenergy(sol.t,sol.y[0,:],rover)/sol.y[1,-1]}
     
+    #adding telemetry data to rover
     rover['telemetry'] = telemetry
     
     return rover
