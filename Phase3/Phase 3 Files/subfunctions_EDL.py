@@ -13,6 +13,21 @@ from scipy.integrate import solve_ivp
 
 
 def get_mass_rover(edl_system):
+    """
+    Description		
+This function will compute the total mass of the rover and all of its components. 		
+
+Calling Syntax		
+w = get_mass_rover(edl_system)		
+
+Input Arguments		
+edl_system     	dictionary	Data structure containing system parameters
+
+Return Arguments		
+m	scalar	Mass of the rover system (kg)
+
+
+    """
 
     # Computes the mass of the rover defined in rover field of the edl system 
     # struct. Assumes that the rover is defined as a dict corresponding to 
@@ -25,7 +40,23 @@ def get_mass_rover(edl_system):
     return m
 
 def get_mass_rockets(edl_system):
+    '''
+    
 
+    Description		
+This function will get the current mass of the rockets based on the mass and fuel reserves		
+
+Calling Syntax		
+w = get_mass_rockets(edl_system)		
+
+Input Arguments		
+edl_system	dictionary	Data structure containing system parameters
+
+Return Arguments		
+m	scalar	Mass of the remaining fuel (kg)
+
+
+    '''
     # Returns the curret total mass of all rockets on the edl system. 
 
     m = edl_system['num_rockets']*(edl_system['rocket']['structure_mass'] + edl_system['rocket']['fuel_mass'])
@@ -33,7 +64,23 @@ def get_mass_rockets(edl_system):
     return m
 
 def get_mass_edl(edl_system):
+    '''
+    Description		
+This function gets the mass of the entire system at any point in the simulation. 		
+It checks for the ejection of certain components like the parachute and heat shield to give		
+an accurate estimate of the mass.		
 
+Calling Syntax		
+w = get_mass_edl(edl_system)		
+
+Input Arguments		
+edl_system	dictionary	Data structure containing system parameters
+
+Return Arguments		
+m	scalar	Mass of the edl system (kg)
+
+
+    '''
     # Returns the total current mass of the edl system 
     
     m = int(not(edl_system['parachute']['ejected']))*edl_system['parachute']['mass'] + \
@@ -43,7 +90,27 @@ def get_mass_edl(edl_system):
     return m
 
 def get_local_atm_properties(planet, altitude):
+    '''
     
+
+    Description		
+Returns local atmospheric properties at a given altitude. It checks for low or high altitude		
+to give accurate values. 		
+
+Calling Syntax		
+x, y, z = get_local_atm_properties(planet, altitude)		
+
+Input Arguments		
+planet	dictionary	Data structure containing gravity of the planet
+altitude	dictionary	Data structure containing current altitude based on simulation data
+
+Return Arguments		
+density	scalar	The density of the atmosphere at a certain altitude (kg/m^3)
+temperature	scalar	The temperature of the atmosphere at a certain altitude ©
+pressure	scalar	The pressure of the atmosphere at a certain altitude (kPa)
+
+
+    '''
     
     
     # get_local_atm_properties
@@ -75,7 +142,26 @@ def get_local_atm_properties(planet, altitude):
     return density, temperature, pressure
 
 def F_buoyancy_descent(edl_system,planet,altitude):
+    '''
     
+
+    Description		
+This function calculates the force of bouyancy as the rover decends. It takes the density of the 		
+atmosphere at the altitude and a certain drag coefficient to return a force.		
+
+Calling Syntax		
+w = F_bouyancy_descent(edl_system, planet, altitude)		
+
+Input Arguments		
+edl_system	dictionary	Data structure containing system parameters
+planet	dictionary	Data structure containing planet parameters (gravity)
+altitude	scalar	Value of the current altitude (m)
+
+Return Arguments		
+F 	scalar	Bouyancy force at any point given inputs (N)
+
+
+    '''
     # Compute the net buoyancy force. 
     
     density, _, _ = get_local_atm_properties(planet, altitude)
@@ -87,7 +173,28 @@ def F_buoyancy_descent(edl_system,planet,altitude):
 
 
 def F_drag_descent(edl_system,planet,altitude,velocity):
+    '''
     
+
+    Description		
+This function calculates the drag force on the descending rover at any one point. It takes the 		
+density of the atmosphere, altitude, and velocity in to account. It also type checks for certain		
+components as to make sure the mass argument is correct.		
+
+Calling Syntax		
+w = F_drag_descent(edl_system, planet, altitude, velocity)		
+
+Input Arguments		
+edl_system	dictionary	Data structure containing system parameters
+planet	dictionary	Data structure containing planet parameters (gravity)
+altitude	scalar	Value of the current altitude (m)
+velocity	scalar	Value of the current velocity (m/s)
+
+Return Arguments		
+F 	scalar	Drag force at any point given inputs (N)
+
+
+    '''
     # Compute the net drag force. 
     
     
@@ -139,7 +246,23 @@ def F_drag_descent(edl_system,planet,altitude,velocity):
     return F
 
 def F_gravity_descent(edl_system,planet):
+    '''
     
+
+    Description		
+This function returns the force of gravity on the system as it is descending.		
+
+Calling Syntax		
+F = F_gravity_descent(edl_system, planet)		
+
+Input Arguments		
+edl_system	dictionary	Data structure containing system parameters
+planet	dictionary	Data structure containing planet parameters (gravity)
+
+Return Arguments		
+F	scalar	Drag force at any point given inputs (N)
+
+    '''
     # Compute the gravitational force acting on the EDL system
 
     F = get_mass_edl(edl_system)*planet['g']
@@ -147,6 +270,22 @@ def F_gravity_descent(edl_system,planet):
     return F
 
 def v2M_Mars(v, a):
+    '''
+    Description		
+This function calculates the aboslute mach number. It can be interpolated from an array of given		
+values.		
+
+Calling Syntax		
+M = v2M_Mars(v, a)		
+
+Input Arguments		
+v	scalar	Velocity of the system (m/s)
+a	scalar	Altitude of the system (m)
+
+Return Arguments		
+M  	scalar	Absolute Mach number of system
+
+    '''
     # Converts descent speed, v [m/s], to Mach number on Mars as a function of 
     # altitude, a [m].
     
@@ -179,6 +318,25 @@ def v2M_Mars(v, a):
 
 
 def thrust_controller(edl_system, planet):
+    '''
+    
+
+    Description		
+This function implements a PID controller for the EDL system. It uses structures to create		
+a modified edl_system which modifies rocket and telemetry substructers.		
+
+Calling Syntax		
+edl_system = thrust_controller(edl_system, planet)		
+
+Input Arguments		
+edl_system  	dictionary	Data structure containing system parameters
+planet	dictionary	Data structure containing planet parameters (gravity)
+
+Return Arguments		
+edl_system	dictionary	Modified data structure containing system parameters
+
+
+    '''
     # thrust_controller
     #
     # This function implements a PID Controller for the EDL system. Uses
@@ -273,7 +431,23 @@ def thrust_controller(edl_system, planet):
     return edl_system 
 
 def edl_events(edl_system, mission_events):
+    '''
+    
 
+    Description		
+This function defines the events that occur in the system simulation		
+
+Calling Syntax		
+events = edl_events(edl_system, mission_events)		
+
+Input Arguments		
+edl_system	dictionary	Data structure containing system parameters
+mission_events	dictionary	Data structure containing mission event parameters
+
+Return Arguments		
+events  	list	List of each event that occurs throughout the simulation
+
+    '''
     # Defines events that occur in EDL System simulation.
     #
     # y = [ velocity, altitude, fuel_mass] and more
@@ -332,7 +506,27 @@ def edl_events(edl_system, mission_events):
     return events
 
 def edl_dynamics(t, y, edl_system, planet):
+    '''
+    
 
+    Description		
+This function calculates the dynamics of the EDL system as it descends and lowers the rover		
+to the surface. It type checks and gives an array of the system.		
+
+Calling Syntax		
+dydt = edl_dynamics(t, y, edl_system, planet)		
+
+Input Arguments		
+t	scalar	Time of each event as it occurs (sec)
+y	array	array of the system of equations
+edl_system	dictionary	Data structure containing system parameters
+planet	dictionary	Data structure containing planet parameters (gravity)
+
+Return Argument		
+dydt	array	Array of the system of equations giving the dynamic solution
+
+
+    '''
     # Dynamics of EDL as it descends and lowers the rover to the surface. 
     # State vector: 
     #   y=[vel_edl;pos_edl;fuel_mass;ei_vel;ei_pos;vel_rov;pos_rov]
@@ -548,6 +742,29 @@ def edl_dynamics(t, y, edl_system, planet):
 
 
 def update_edl_state(edl_system, TE, YE, Y, ITER_INFO):
+    '''
+    
+
+    Description		
+This function updates the EDL system as different events occur.		
+
+Calling Syntax		
+edl_system, y0, TERMINATE_SIM = update_edl_system(edl_system, TE, YE, Y, ITER_INFO)		
+
+Input Arguments		
+edl_system 	dictionary	Data structure containing system parameters
+TE	array	2D array of the time that has passed
+YE	array	3D array of the position of the system
+Y	array	Array of the altitude points
+ITER_INFO	boolean	True if certain iteration criteria are triggered
+
+Return Arguments		
+edl_system	dictionary	Updated data structure with new system parameters
+y0	list	The location of the system at a current time
+TERMINATE_SIM	boolean	If the simulation is finished = True, if not = False
+
+
+    '''
     # update_edl
     #
     # update status of EDL System based on simulation events
@@ -763,6 +980,30 @@ def update_edl_state(edl_system, TE, YE, Y, ITER_INFO):
     return edl_system, y0, TERMINATE_SIM
 
 def simulate_edl(edl_system, planet, mission_events, tmax, ITER_INFO):
+   '''
+    
+
+    Description		
+This function simulates the entire EDL system. It calls each function to make a comprehensive		
+list of the mission events and can give each value of the system at any point.		
+
+Calling Syntax		
+T, Y, edl_system = simulate_edl(edl_system, planet, mission_events, tmax, ITER_INFO)		
+
+Input Arguments		
+edl_system	dictionary	Data structure containing system parameters
+planet	dictionary	Data structure containing planet parameters (gravity)
+mission_events	function	Function giving each mission event
+tmax	scalar	The maximum time the mission can take
+ITER_INFO	boolean	True if certain iteration criteria are triggered
+
+Return Arguments		
+T	list	List of each time point through the simulation
+Y	array	2D Array of the y position with respect to each time point through the simulation
+edl_system	dictionary	Updated data structure containing system parameters
+
+
+    '''
     # simulate_edl
     #
     # This simulates the EDL system. It requires a definition of the
